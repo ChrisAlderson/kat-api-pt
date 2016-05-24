@@ -219,7 +219,6 @@ var KAT = function KAT() {
 
     if (!query) {
       console.error("Field 'query' is required.");
-      process.exit(1);
     } else if (typeof query === "string") {
       endpoint += query;
     } else if ((typeof query === "undefined" ? "undefined" : (0, _typeof3.default)(query)) === "object") {
@@ -249,7 +248,6 @@ var KAT = function KAT() {
       if (query.order) endpoint += "&order=" + query.order;
     } else {
       console.err("Not a valid query.");
-      process.exit(1);
     }
 
     return endpoint;
@@ -285,9 +283,8 @@ var KAT = function KAT() {
               _context.t0 = _context["catch"](0);
 
               console.error("Encoutered an error: " + _context.t0);
-              process.exit(1);
 
-            case 13:
+            case 12:
             case "end":
               return _context.stop();
           }

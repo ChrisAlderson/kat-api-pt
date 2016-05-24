@@ -190,7 +190,6 @@ const KAT = () => {
 
     if (!query) {
       console.error(`Field 'query' is required.`);
-      process.exit(1);
     } else if (typeof (query) === "string") {
       endpoint += query;
     } else if (typeof (query) === "object") {
@@ -220,7 +219,6 @@ const KAT = () => {
       if (query.order) endpoint += `&order=${query.order}`;
     } else {
       console.err("Not a valid query.");
-      process.exit(1);
     }
 
     return endpoint;
@@ -242,7 +240,6 @@ const KAT = () => {
       return formatPage(data, query.page || 1, Date.now() - t);
     } catch (err) {
       console.error(`Encoutered an error: ${err}`);
-      process.exit(1);
     }
   };
 
