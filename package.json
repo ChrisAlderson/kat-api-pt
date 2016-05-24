@@ -1,6 +1,6 @@
 {
   "name": "kat-api-pt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A KickassTorrents api wrapper heavily based on the kat-api module of paulhobbel.",
   "dependencies": {
     "bytes": "^2.3.0",
