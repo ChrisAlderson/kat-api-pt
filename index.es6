@@ -9,7 +9,7 @@ const defaultOptions = {
     "Accept-Encoding": "gzip, deflate"
   },
   "gzip": true,
-  "timeout": 1 * 1000
+  "timeout": 3 * 1000
 };
 
 /**

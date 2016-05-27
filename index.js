@@ -36,7 +36,7 @@ var defaultOptions = {
     "Accept-Encoding": "gzip, deflate"
   },
   "gzip": true,
-  "timeout": 1 * 1000
+  "timeout": 3 * 1000
 };
 
 /**
@@ -305,4 +305,4 @@ var KAT = function KAT() {
 };
 
 // Export the kat factory function.
-exports.default = KAT();
+exports.default = KAT;
