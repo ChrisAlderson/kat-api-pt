@@ -1,5 +1,5 @@
 // Import the neccesary modules.
-import katApi from "../index";
+import katApi from "../index.es6";
 
 // Advanced search
 katApi.search({

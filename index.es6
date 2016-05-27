@@ -3,25 +3,27 @@ import bytes from "bytes";
 import cheerio from "cheerio";
 import req from "request";
 
+// The default request options
+const defaultOptions = {
+  "headers": {
+    "Accept-Encoding": "gzip, deflate"
+  },
+  "gzip": true,
+  "timeout": 1 * 1000
+};
+
 /**
  * @class
  * @classdesc The factory function for getting information from {@link http://kat.cr/}.
- * @memberof module:lib/kat
  * @property {Array} BASE_URLS - An array of KAT proxies.
  * @property {Object} request - The request object with added defaults.
  * @property {Object} katPlatformMap - Map object for the platform codes.
  * @property {Object} katLanguageMap - Map object for the language codes.
  */
-const KAT = () => {
+const KAT = (options = defaultOptions) => {
 
   const BASE_URLS = ["https://kat.cr/usearch/", "https://kickassto.co/usearch/"];
-  const request = req.defaults({
-    "headers": {
-      "Accept-Encoding": "gzip, deflate"
-    },
-    "gzip": true,
-    "timeout": 2 * 1000
-  });
+  const request = req.defaults(options);
 
   const katPlatformMap = {
     "android": 4,
@@ -107,7 +109,6 @@ const KAT = () => {
   /**
    * @description Formats the info from a given search page.
    * @function KAT#formatPage
-   * @memberof module:lib/kat
    * @param {DOM} response - The body from `requestData`.
    * @param {Integer} page - The page number form the search request.
    * @param {Date} date - Date used for the response time.
@@ -155,10 +156,9 @@ const KAT = () => {
   /**
    * @description Request the data from {@link https://kat.cr/} with an endpoint.
    * @function KAT#requestData
-   * @memberof module:lib/kat
    * @param {String} url - The base url of the request
    * @param {String} endpoint - The endpoint for the request
-   * @param {Boolean} retry - Retry the function (Default `true`).
+   * @param {Boolean} [retry=true] - Retry the request.
    * @returns {Promise} - The body of the request.
    */
   const requestData = (url, endpoint, retry = true) => {
@@ -167,7 +167,7 @@ const KAT = () => {
         if (err && retry) {
           return resolve(requestData(BASE_URLS[1], endpoint, false));
         } else if (err) {
-          return reject(`${err} with link: '${endpoint}'`);
+          return reject(`${err.code} with link: '${endpoint}'`);
         } else if (!body || res.statusCode >= 400) {
           return reject(`Could not load data from: '${endpoint}'`);
         } else {
@@ -189,7 +189,7 @@ const KAT = () => {
     let endpoint = "";
 
     if (!query) {
-      console.error(`Field 'query' is required.`);
+      return new Error(`Field 'query' is required.`);
     } else if (typeof (query) === "string") {
       endpoint += query;
     } else if (typeof (query) === "object") {
@@ -218,7 +218,7 @@ const KAT = () => {
       if (query.sort_by) endpoint += `/?field=${query.sort_by}`;
       if (query.order) endpoint += `&order=${query.order}`;
     } else {
-      console.err("Not a valid query.");
+      return new Error("Not a valid query.");
     }
 
     return endpoint;
@@ -239,7 +239,7 @@ const KAT = () => {
       const data = await requestData(BASE_URLS[0], endpoint);
       return formatPage(data, query.page || 1, Date.now() - t);
     } catch (err) {
-      console.error(`Encoutered an error: ${err}`);
+      return new Error(err);
     }
   };
 

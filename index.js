@@ -30,6 +30,14 @@ var _request2 = _interopRequireDefault(_request);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var defaultOptions = {
+  "headers": {
+    "Accept-Encoding": "gzip, deflate"
+  },
+  "gzip": true,
+  "timeout": 3 * 1000
+};
+
 /**
  * @class
  * @classdesc The factory function for getting information from {@link http://kat.cr/}.
@@ -39,16 +47,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @property {Object} katPlatformMap - Map object for the platform codes.
  * @property {Object} katLanguageMap - Map object for the language codes.
  */
+// Import the neccesary modules.
 var KAT = function KAT() {
+  var options = arguments.length <= 0 || arguments[0] === undefined ? defaultOptions : arguments[0];
+
 
   var BASE_URLS = ["https://kat.cr/usearch/", "https://kickassto.co/usearch/"];
-  var request = _request2.default.defaults({
-    "headers": {
-      "Accept-Encoding": "gzip, deflate"
-    },
-    "gzip": true,
-    "timeout": 2 * 1000
-  });
+  var request = _request2.default.defaults(options);
 
   var katPlatformMap = {
     "android": 4,
@@ -291,7 +296,7 @@ var KAT = function KAT() {
         }
       }, _callee, undefined, [[0, 9]]);
     }));
-    return function search(_x2) {
+    return function search(_x3) {
       return ref.apply(this, arguments);
     };
   }();
@@ -303,5 +308,4 @@ var KAT = function KAT() {
 };
 
 // Export the kat factory function.
-// Import the neccesary modules.
 exports.default = KAT();

@@ -2,7 +2,38 @@
 
 A KickassTorrents api wrapper heavily based on the [kat-api](https://github.com/paulhobbel/kat-api) module of [paulhobbel](https://github.com/paulhobbel).
 
-## Simple search
+## Usage
+
+Use with default options:
+
+```js
+// Or use 'require'.
+import katApi from "kat-api-pt";
+
+// Use the api without any options.
+const kat = katApi();
+```
+
+Override the default request options:
+
+```js
+// Or use 'require'.
+import katApi from "kat-api-pt";
+
+// For more options see:
+const options = {
+  "headers": {
+    "Accept-Encoding": "gzip, deflate"
+  },
+  "gzip": true,
+  "timeout": 3 * 1000
+};
+
+// Use the api with options.
+const kat = katApi(options);
+```
+
+### Simple search
 
 Example of a simple search:
 
@@ -12,7 +43,7 @@ katApi.search("Anger Management")
   .catch(err => console.err(err));
 ```
 
-## Advanced search
+### Advanced search
 
 Example of an advanced search:
 
