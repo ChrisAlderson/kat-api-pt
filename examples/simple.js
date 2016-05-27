@@ -1,5 +1,5 @@
 // Import the neccesary modules.
-import katApi from "../index.es6";
+import katApi from "../index.js";
 
 // Simple search
 katApi.search("Anger Management")

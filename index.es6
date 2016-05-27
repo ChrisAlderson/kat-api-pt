@@ -251,4 +251,4 @@ const KAT = (options = defaultOptions) => {
 };
 
 // Export the kat factory function.
-export default KAT();
+export default KAT;

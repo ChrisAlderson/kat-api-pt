@@ -30,18 +30,18 @@ var _request2 = _interopRequireDefault(_request);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// The default request options
 var defaultOptions = {
   "headers": {
     "Accept-Encoding": "gzip, deflate"
   },
   "gzip": true,
-  "timeout": 3 * 1000
+  "timeout": 1 * 1000
 };
 
 /**
  * @class
  * @classdesc The factory function for getting information from {@link http://kat.cr/}.
- * @memberof module:lib/kat
  * @property {Array} BASE_URLS - An array of KAT proxies.
  * @property {Object} request - The request object with added defaults.
  * @property {Object} katPlatformMap - Map object for the platform codes.
@@ -139,7 +139,6 @@ var KAT = function KAT() {
   /**
    * @description Formats the info from a given search page.
    * @function KAT#formatPage
-   * @memberof module:lib/kat
    * @param {DOM} response - The body from `requestData`.
    * @param {Integer} page - The page number form the search request.
    * @param {Date} date - Date used for the response time.
@@ -187,10 +186,9 @@ var KAT = function KAT() {
   /**
    * @description Request the data from {@link https://kat.cr/} with an endpoint.
    * @function KAT#requestData
-   * @memberof module:lib/kat
    * @param {String} url - The base url of the request
    * @param {String} endpoint - The endpoint for the request
-   * @param {Boolean} retry - Retry the function (Default `true`).
+   * @param {Boolean} [retry=true] - Retry the request.
    * @returns {Promise} - The body of the request.
    */
   var requestData = function requestData(url, endpoint) {
@@ -201,7 +199,7 @@ var KAT = function KAT() {
         if (err && retry) {
           return resolve(requestData(BASE_URLS[1], endpoint, false));
         } else if (err) {
-          return reject(err + " with link: '" + endpoint + "'");
+          return reject(err.code + " with link: '" + endpoint + "'");
         } else if (!body || res.statusCode >= 400) {
           return reject("Could not load data from: '" + endpoint + "'");
         } else {
@@ -223,7 +221,7 @@ var KAT = function KAT() {
     var endpoint = "";
 
     if (!query) {
-      console.error("Field 'query' is required.");
+      return new Error("Field 'query' is required.");
     } else if (typeof query === "string") {
       endpoint += query;
     } else if ((typeof query === "undefined" ? "undefined" : (0, _typeof3.default)(query)) === "object") {
@@ -252,7 +250,7 @@ var KAT = function KAT() {
       if (query.sort_by) endpoint += "/?field=" + query.sort_by;
       if (query.order) endpoint += "&order=" + query.order;
     } else {
-      console.err("Not a valid query.");
+      return new Error("Not a valid query.");
     }
 
     return endpoint;
@@ -286,8 +284,7 @@ var KAT = function KAT() {
             case 9:
               _context.prev = 9;
               _context.t0 = _context["catch"](0);
-
-              console.error("Encoutered an error: " + _context.t0);
+              return _context.abrupt("return", new Error(_context.t0));
 
             case 12:
             case "end":
