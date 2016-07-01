@@ -1,26 +1,26 @@
-# kat-api-pt
+# KAT API PT
 
-A KickassTorrents api wrapper heavily based on the [kat-api](https://github.com/paulhobbel/kat-api) module of [paulhobbel](https://github.com/paulhobbel).
+A KickassTorrents API wrapper heavily based on the [kat-api](https://github.com/paulhobbel/kat-api) module of [paulhobbel](https://github.com/paulhobbel).
 
 ## Usage
 
 Use with default options:
 
-```js
-// Or use 'require'.
-import katApi from "kat-api-pt";
+```javascript
+// Import the API wrapper.
+import kat from "kat-api-pt";
 
-// Use the api without any options.
-const kat = katApi();
+// Create an instance of the API wrapper.
+const kat = new KAT();
 ```
 
 Override the default request options:
 
-```js
-// Or use 'require'.
-import katApi from "kat-api-pt";
+```javascript
+// Import the API wrapper.
+import KAT from "kat-api-pt";
 
-// For more options see:
+// For more options see https://github.com/request/request.
 const options = {
   "headers": {
     "Accept-Encoding": "gzip, deflate"
@@ -29,8 +29,8 @@ const options = {
   "timeout": 3 * 1000
 };
 
-// Use the api with options.
-const kat = katApi(options);
+// Create an instance of the API wrapper.
+const kat = new KAT(options);
 ```
 
 ### Simple search
@@ -38,7 +38,8 @@ const kat = katApi(options);
 Example of a simple search:
 
 ```javascript
-katApi.search("Anger Management")
+// Simple search
+kat.search("Anger Management")
   .then(res => console.log(res))
   .catch(err => console.err(err));
 ```
@@ -48,7 +49,8 @@ katApi.search("Anger Management")
 Example of an advanced search:
 
 ```javascript
-katApi.search({
+// Advanced search
+kat.search({
     query: "Anger Management",
     category: "tv",
     min_seeds: "3",
@@ -66,7 +68,7 @@ katApi.search({
 
 Example of a response:
 
-```js
+```javascript
 {
 	response_time: 1066,
 	page: 1,
@@ -80,7 +82,7 @@ Example of a response:
 
 Example of one object from the `results` array:
 
-```js
+```javascript
 {
 	title: "Anger Management (2003) 720p BrRip x264 - 650MB - YIFY",
 	category: "Highres Movies",
