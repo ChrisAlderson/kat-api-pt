@@ -1,54 +1,38 @@
 # kat-api-pt
 
-A KickassTorrents api wrapper heavily based on the [kat-api](https://github.com/paulhobbel/kat-api) module of [paulhobbel](https://github.com/paulhobbel).
+[![Build Status](https://travis-ci.org/ChrisAlderson/kat-api-pt.svg?branch=master)]()
+[![Dependency Status](https://david-dm.org/ChrisAlderson/kat-api-pt.svg)](https://david-dm.org/ChrisAlderson/kat-api-pt)
+[![devDependency Status](https://david-dm.org/ChrisAlderson/kat-api-pt/dev-status.svg)](https://david-dm.org/ChrisAlderson/kat-api-pt#info=devDependencies)
+
+A KickassTorrents API wrapper heavily based on the [kat-api](https://github.com/paulhobbel/kat-api) module of [paulhobbel](https://github.com/paulhobbel).
 
 ## Usage
 
-Use with default options:
-
-```js
-// Or use 'require'.
-import katApi from "kat-api-pt";
-
-// Use the api without any options.
-const kat = katApi();
+#### Setup
+```
+npm install --save kat-api-pt
 ```
 
-Override the default request options:
-
+#### Initialize
 ```js
-// Or use 'require'.
-import katApi from "kat-api-pt";
+const KAT = require("kat-api-pt");
 
-// For more options see:
-const options = {
-  "headers": {
-    "Accept-Encoding": "gzip, deflate"
-  },
-  "gzip": true,
-  "timeout": 3 * 1000
-};
-
-// Use the api with options.
-const kat = katApi(options);
+// Options are the request default options.
+let kat = new KAT([options, debug]);
 ```
 
-### Simple search
+### Example usage
 
-Example of a simple search:
-
-```javascript
-katApi.search("Anger Management")
+#### Simple search
+```js
+kat.search("Anger Management")
   .then(res => console.log(res))
   .catch(err => console.err(err));
 ```
 
-### Advanced search
-
-Example of an advanced search:
-
-```javascript
-katApi.search({
+#### Advanced search
+```js
+kat.search({
     query: "Anger Management",
     category: "tv",
     min_seeds: "3",

@@ -1,8 +1,11 @@
 // Import the neccesary modules.
-import katApi from "../index.js";
+const KAT = require("../kat-api-pt.js");
+
+// Create an instance of the API wrapper.
+const kat = new KAT();
 
 // Advanced search
-katApi.search({
+kat.search({
     query: "Anger Management",
     category: "tv",
     min_seeds: "3",
