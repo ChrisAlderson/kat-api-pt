@@ -7,14 +7,14 @@ describe("KAT", () => {
   let kat;
   before(() => kat = new KAT());
 
-  it("Should get a list of tv shows", done => {
+  it("Should get results with a simple search", done => {
     kat.search("Game of Thrones").then(res => {
         assert.isObject(res);
         done();
       }).catch(err => done(err));
   });
 
-  it("Should get episodes of a tv show", done => {
+  it("Should get results with an advanced search", done => {
     kat.search({
         query: "Game of Thrones",
         category: "tv",
@@ -30,7 +30,7 @@ describe("KAT", () => {
       }).catch(err => done(err));
   });
 
-  it("Should get episodes of a tv show", done => {
+  it("Should not get results with an advanced search", done => {
     kat.search({
         query: "Game of Thrones",
         category: "tv",
