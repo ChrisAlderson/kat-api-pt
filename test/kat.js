@@ -9,44 +9,45 @@ describe("KAT", () => {
 
   it("Should get results with a simple search", done => {
     kat.search("Game of Thrones").then(res => {
-        assert.isObject(res);
-        done();
-      }).catch(err => done(err));
+      assert.isObject(res);
+      done();
+    }).catch(err => done(err));
   });
 
   it("Should get results with an advanced search", done => {
     kat.search({
-        query: "Game of Thrones",
-        category: "tv",
-        min_seeds: "3",
-        uploader: "ettv",
-        sort_by: "seeders",
-        order: "desc",
-        verified: 1,
-        language: "en"
-      }).then(res => {
-        assert.isObject(res);
-        done();
-      }).catch(err => done(err));
+      query: "Game of Thrones",
+      category: "tv",
+      min_seeds: "3",
+      uploader: "ettv",
+      sort_by: "seeders",
+      order: "desc",
+      verified: 1,
+      language: "en",
+      page: 1
+    }).then(res => {
+      assert.isObject(res);
+      done();
+    }).catch(err => done(err));
   });
 
   it("Should not get results with an advanced search", done => {
     kat.search({
-        query: "Game of Thrones",
-        category: "tv",
-        min_seeds: "666",
-        uploader: "ettv",
-        sort_by: "seeders",
-        order: "desc",
-        verified: 1,
-        language: "en"
-      }).then(res => {
-        assert.isObject(res);
-        done();
-      }).catch(err => {
-        assert.isOk(err);
-        done();
-      });
+      query: "Game of Thrones",
+      category: "tv",
+      min_seeds: "666",
+      uploader: "ettv",
+      sort_by: "seeders",
+      order: "desc",
+      verified: 1,
+      language: "en"
+    }).then(res => {
+      assert.isObject(res);
+      done();
+    }).catch(err => {
+      assert.isOk(err);
+      done();
+    });
   });
 
 });

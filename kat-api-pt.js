@@ -3,6 +3,7 @@
 const bytes = require("bytes");
 const cheerio = require("cheerio");
 const req = require("request");
+const querystring = require("querystring");
 
 const defaultOptions = {
   "headers": {
@@ -14,8 +15,9 @@ const defaultOptions = {
 
 module.exports = class KAT {
 
-  constructor(options = defaultOptions, debug = false) {
-    this.BASE_URLS = ["https://kat.cr/usearch/", "https://kickassto.co/usearch/"];
+  constructor({options = defaultOptions, debug = false} = {}) {
+    KAT.BASE_URLS = ["https://kat.cr/usearch/", "https://kickassto.co/usearch/"];
+
     this.request = req.defaults(options);
     this.debug = debug;
 
@@ -148,15 +150,17 @@ module.exports = class KAT {
    * @returns {Promise} - The body of the request.
    */
   requestData(url, endpoint, retry = true) {
+    const uri = `${url}${endpoint}`
+    if (this.debug) console.warn(`Making request to: '${uri}'`);
     return new Promise((resolve, reject) => {
-      this.request(`${url}${endpoint}`, (err, res, body) => {
+      this.request(uri, (err, res, body) => {
         if (err && retry) {
           if (this.debug) console.warn(`${err.code} trying again.`);
-          return resolve(this.requestData(this.BASE_URLS[1], endpoint, false));
+          return resolve(this.requestData(KAT.BASE_URLS[1], endpoint, false));
         } else if (err) {
-          return reject(`${err.code} with link: '${endpoint}'`);
+          return reject(err);
         } else if (!body || res.statusCode >= 400) {
-          return reject(`Could not load data from: '${endpoint}'`);
+          return reject(new Error(`No data found for url: '${uri}', statuscode: ${res.statusCode}`));
         } else {
           return resolve(body);
         }
@@ -172,6 +176,7 @@ module.exports = class KAT {
    */
   makeEndpoint(query) {
     let endpoint = "";
+    const qs = {};
 
     if (!query) {
       return new Error(`Field 'query' is required.`);
@@ -200,15 +205,14 @@ module.exports = class KAT {
         endpoint += ` platform_id:${platformCode}`;
       }
       if (query.page) endpoint += `/${query.page}`;
-      if (query.sort_by) endpoint += `/?field=${query.sort_by}`;
-      if (query.order) endpoint += `&order=${query.order}`;
+
+      if (query.sort_by) qs.field = query.sort_by;
+      if (query.order) qs.order = query.order;
     } else {
       return new Error("Not a valid query.");
     }
 
-    if (this.debug) console.warn(`Making request to: ${endpoint}.`);
-
-    return endpoint;
+    return `${encodeURIComponent(endpoint)}${querystring.stringify(qs)}`;
   };
 
   /**
@@ -220,7 +224,7 @@ module.exports = class KAT {
   search(query) {
     const endpoint = this.makeEndpoint(query);
     const t = Date.now();
-    return this.requestData(this.BASE_URLS[0], endpoint)
+    return this.requestData(KAT.BASE_URLS[0], endpoint)
       .then(data => this.formatPage(data, query.page || 1, Date.now() - t));
   };
 
