@@ -18,7 +18,7 @@ npm install --save kat-api-pt
 const KAT = require("kat-api-pt");
 
 // Options are the request default options.
-let kat = new KAT({[options, debug]});
+const kat = new KAT({[options, debug]});
 ```
 
 ### Example usage
