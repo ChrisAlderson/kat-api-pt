@@ -1,231 +1,168 @@
-"use strict";
+'use strict';
 
-const bytes = require("bytes");
-const cheerio = require("cheerio");
-const req = require("request");
-const querystring = require("querystring");
-
-const defaultOptions = {
-  "headers": {
-    "Accept-Encoding": "gzip, deflate"
-  },
-  "gzip": true,
-  "timeout": 3 * 1000
-};
+const bytes = require('bytes');
+const cheerio = require('cheerio');
+const got = require('got');
 
 module.exports = class KAT {
 
-  constructor({options = defaultOptions, debug = false} = {}) {
-    KAT.BASE_URLS = ["https://kat.cr/usearch/", "https://kickassto.co/usearch/"];
-
-    this.request = req.defaults(options);
+  constructor({baseUrl = 'https://katcr.co/new/', debug = false} = {}) {
+    this._baseUrl = baseUrl
     this.debug = debug;
 
-    this.katPlatformMap = {
-      "android": 4,
-      "blackberry": 7,
-      "gamecube": 15,
-      "ipad": 18,
-      "iphone": 19,
-      "ipod": 20,
-      "java": 22,
-      "linux": 24,
-      "mac": 25,
-      "nintendo3-ds": 31,
-      "nintendo-ds": 33,
-      "dvd": 35,
-      "other": 65,
-      "palm-os": 37,
-      "pc": 38,
-      "ps2": 43,
-      "ps3": 44,
-      "ps4": 66,
-      "psp": 45,
-      "symbian": 52,
-      "wii": 56,
-      "wiiu": 68,
-      "windows-ce": 57,
-      "windows-mobile": 58,
-      "windows-phone": 59,
-      "xbox": 61,
-      "xbox-360": 62,
-      "xbox-one": 67
+    this._category = {
+      anime: 'Anime',
+      applications: 'Applications',
+      books: 'Books',
+      games: 'Games',
+      movies: 'Movies',
+      music: 'Music',
+      other: 'Other',
+      tv: 'TV',
+      xxx: 'XXX'
     };
-
-    this.katLanguageMap = {
-      "en": 2,
-      "sq": 42,
-      "ar": 7,
-      "eu": 44,
-      "bn": 46,
-      "pt-br": 39,
-      "bg": 37,
-      "yue": 45,
-      "ca": 47,
-      "zh": 10,
-      "hr": 34,
-      "cs": 32,
-      "da": 26,
-      "nl": 8,
-      "tl": 11,
-      "fi": 31,
-      "fr": 5,
-      "de": 4,
-      "el": 30,
-      "he": 25,
-      "hi": 6,
-      "hu": 27,
-      "it": 3,
-      "ja": 15,
-      "kn": 49,
-      "ko": 16,
-      "lt": 43,
-      "ml": 21,
-      "cmn": 23,
-      "ne": 48,
-      "no": 19,
-      "fa": 33,
-      "pl": 9,
-      "pt": 17,
-      "pa": 35,
-      "ro": 18,
-      "ru": 12,
-      "sr": 28,
-      "sl": 36,
-      "es": 14,
-      "sv": 20,
-      "ta": 13,
-      "te": 22,
-      "th": 24,
-      "tr": 29,
-      "uk": 40,
-      "vi": 38
+    this._lang = {
+      'all': 0,
+      'english': 1,
+      'bengali': 10,
+      'chinese': 11,
+      'dutch': 12,
+      'french': 2,
+      'german': 3,
+      'greek': 13,
+      'hindi': 9,
+      'italian': 4,
+      'japanese': 14,
+      'korean': 15,
+      'russian': 7,
+      'spanish': 6,
+      'tamil': 16,
+      'teleglu': 17,
+      'turkish': 18,
+      'unknown': 8
     };
-  };
+    this._sort = {
+      id: 'id',
+      name: 'name',
+      comments: 'comments',
+      size: 'size',
+      completed: 'times_completed',
+      seeders: 'seeders',
+      leechers: 'leechers'
+    };
+    this._order = {
+      asc: 'asc',
+      desc: 'desc'
+    };
+  }
 
-  formatPage(response, page, date) {
-    const $ = cheerio.load(response);
+  _get(uri, data = {}) {
+    if (this._debug) console.warn(`Making request to: '${uri}', opts: ${JSON.stringify(opts)}`);
 
-    const matcher = /\s+[a-zA-Z]+\s\d+[-]\d+\s[a-zA-Z]+\s(\d+)/;
-    const totalResults = $("table#mainSearchTable.doublecelltable").find("h2").find("span").text().match(matcher);
-    const totalPages = $("div.pages.botmarg5px.floatright").children("a.turnoverButton.siteButton.bigButton").last().text();
+    return got(`${this._baseUrl}/${uri}`, {
+      method: 'GET',
+      query: data
+    }).then(({body}) => body);
+  }
 
-    const formatted = {
-      response_time: parseInt(date),
-      page: parseInt(page),
-      totalResults: parseInt(totalResults[1]),
-      totalPages: totalPages ? totalPages : 1,
+  _formatPage(res, page, date) {
+    const $ = cheerio.load(res);
+
+    const data = $('p[align=center]').text();
+    const total_results = parseInt(data.match(/(\d+)<</i)[1]);
+    const total_pages = Math.ceil(total_results / 20);
+
+    const result = {
+      response_time: date,
+      page: page,
+      total_results,
+      total_pages,
       results: []
     };
 
-    $("table.data").find("tr[id]").each(function() {
-      const title = $(this).find("a.cellMainLink").text();
-      const category = $(this).find("span.font11px.lightgrey.block").find("a[href]").last().text();
-      const link = $(this).find("a.cellMainLink[href]").attr("href");
-      const guid = $(this).find("a.cellMainLink[href]").attr("href");
-      const verified = $(this).find("i.ka.ka16.ka-verify.ka-green").length;
-      const comments = parseInt($(this).find("a.icommentjs.kaButton.smallButton.rightButton").text());
-      const magnet = $(this).find("a.icon16[data-nop]").attr("href");
-      const torrentLink = $(this).find("a.icon16[data-download]").attr("href");
-      const fileSize = $(this).find("td.center").eq(0).text();
-      const size = bytes($(this).find("td.center").eq(0).text());
-      const files = parseInt($(this).find("td.center").eq(1).text());
-      const pubDate = Number(new Date($(this).find("td.center").eq(2).attr("title")));
-      const seeds = parseInt($(this).find("td.center").eq(3).text());
-      const leechs = parseInt($(this).find("td.center").eq(4).text());
+    $('tr.t-row').each(function() {
+      const entry = $(this);
+
+      const title = entry.find('a.cellMainLink').text();
+      const category = entry.find('span[id*=cat_]').find('a').text();
+      const link = `${this._baseUrl}entry.find('a.cellMainLink').attr('href')`;
+      const verifiedTitle = entry.find('i.ka ka-verify').attr('title');
+      const verified = verifiedTitle === 'Uploader' ? 0 : 1;
+      const comments = parseInt(entry.find('a.icommentjs.kaButton.smallButton.rightButton').text());
+      // const magnet = $(this).find('a.icon16[data-nop]').attr('href');
+      const torrentLink = `${this._baseUrl}$(this).find('a.icon16[data-download]').attr('href')`;
+      const fileSize = entry.find('td.ttable_col2').eq(0).text();
+      const size = bytes(fileSize);
+      const pubDate = Number(new Date(entry.find('td.ttable_col1').eq(1).text()));
+      const seeds = parseInt(entry.find('td.ttable_col2').eq(1).text(), 10);
+      const leechs = parseInt(entry.find('td.ttable_col1').eq(2).text(), 10);
       const peers = seeds + leechs;
 
-      formatted.results.push({ title, category, link, guid, verified, comments, magnet, torrentLink, fileSize, size, files, pubDate, seeds, leechs, peers });
-    });
-
-    return formatted;
-  };
-
-  /**
-   * @description Request the data from {@link https://kat.cr/} with an endpoint.
-   * @function KAT#requestData
-   * @param {String} url - The base url of the request
-   * @param {String} endpoint - The endpoint for the request
-   * @param {Boolean} [retry=true] - Retry the request.
-   * @returns {Promise} - The body of the request.
-   */
-  requestData(url, endpoint, retry = true) {
-    const uri = `${url}${endpoint}`
-    if (this.debug) console.warn(`Making request to: '${uri}'`);
-    return new Promise((resolve, reject) => {
-      this.request(uri, (err, res, body) => {
-        if (err && retry) {
-          if (this.debug) console.warn(`${err.code} trying again.`);
-          return resolve(this.requestData(KAT.BASE_URLS[1], endpoint, false));
-        } else if (err) {
-          return reject(err);
-        } else if (!body || res.statusCode >= 400) {
-          return reject(new Error(`No data found for url: '${uri}', statuscode: ${res.statusCode}`));
-        } else {
-          return resolve(body);
-        }
+      result.results.push({
+        title,
+        category,
+        link,
+        verified,
+        comments,
+        // magnet
+        torrentLink,
+        fileSize,
+        size,
+        pubDate,
+        seeds,
+        leechs,
+        peers
       });
     });
-  };
 
-  /**
-   * @description Makes an endpoint for the request.
-   * @function KAT#makeEndpoint
-   * @param {Object} query - Contains values which will determine the endpoint.
-   * @returns {String} - An endpoint for {@link https://kat.cr/}
-   */
-  makeEndpoint(query) {
-    let endpoint = "";
-    const qs = {};
+    return result;
+  }
 
-    if (!query) {
-      return new Error(`Field 'query' is required.`);
-    } else if (typeof (query) === "string") {
-      endpoint += query;
-    } else if (typeof (query) === "object") {
-      if (query.query) endpoint += query.query;
-      if (query.category) endpoint += ` category:${query.category}`;
-      if (query.uploader) endpoint += ` user:${query.uploader}`;
-      if (query.min_seeds) endpoint += ` seeds:${query.min_seeds}`;
-      if (query.age) endpoint += ` age:${query.age}`;
-      if (query.min_files) endpoint += ` files:${query.min_files}`;
-      if (query.imdb) endpoint += ` imdb:${query.imdb.replace(/\D/g, "")}`;
-      if (query.tvrage) endpoint += ` tv:${query.tvrage}`;
-      if (query.isbn) endpoint += ` isbn:${query.isbn}`;
-      if (query.language) {
-        const languageCode = this.katLanguageMap[query.language] !== undefined ? this.katLanguageMap[query.language] : "";
-        endpoint += ` lang_id:${languageCode}`;
-      }
-      if (query.adult_filter) endpoint += ` is_safe:${query.adult_filter}`;
-      if (query.verified) endpoint += ` verified:${query.verified}`;
-      if (query.season) endpoint += ` season:${query.season}`;
-      if (query.episode) endpoint += ` episode:${query.episode}`;
-      if (query.platform_id) {
-        const platformCode = this.katPlatformMap[query.platform_id] !== undefined ? this.katPlatformMap[query.platform_id] : "";
-        endpoint += ` platform_id:${platformCode}`;
-      }
-      if (query.page) endpoint += `/${query.page}`;
-
-      if (query.sort_by) qs.field = query.sort_by;
-      if (query.order) qs.order = query.order;
+  _getData({category, query, page = 1, incldead, freeleech, inclexternal, language, sort_by = 'id', order = 'desc'}, date) {
+    if (category && !this._category[category]) {
+      throw new Error(`'${category}' is not a valid value for category`);
     } else {
-      return new Error("Not a valid query.");
+      category = this._category[category];
+    }
+    if (language && !this._lang[language]) {
+      throw new Error(`'${language}' is not a valid value for lang`);
+    } else {
+      language = this._lang[language];
+    }
+    if (sort_by && !this._sort[sort_by]) {
+      throw new Error(`'${sort_by}' is not a valid value for sort`);
+    } else {
+      sort_by = this._sort[sort_by];
+    }
+    if (order && !this._order[order]) {
+      throw new Error(`'${order}' is not a valid value for order`);
+    } else {
+      order = this._order[order];
     }
 
-    return `${encodeURIComponent(endpoint)}${querystring.stringify(qs)}`;
-  };
+    return this._get('torrents-search.php', {
+      category,
+      search: query,
+      page,
+      incldead,
+      freeleech,
+      inclexternal,
+      lang: language,
+      sort: sort_by,
+      order
+    }).then(res => this._formatPage(res, page, Date.now() - date));
+  }
 
-  /**
-   * @description Returns the formated data from a search request.
-   * @function KAT#search
-   * @param {Object} query - The query object/string to query kickass.
-   * @returns {Promise} - The the content of the search results and some metadata about the search.
-   */
   search(query) {
-    const endpoint = this.makeEndpoint(query);
-    const t = Date.now();
-    return this.requestData(KAT.BASE_URLS[0], endpoint)
-      .then(data => this.formatPage(data, query.page || 1, Date.now() - t));
-  };
+    const date = Date.now();
 
-};
+    if (typeof(query) === 'string') {
+      return this._getData({ query }, date);
+    } else if (typeof(query) === 'object') {
+      return this._getData(query, date);
+    }
+
+    throw new Error('search needs an object or string as a parameter!');
+  }
+
+}
