@@ -24,7 +24,7 @@ const kat = new KAT({[baseUrl, debug]});
 
 #### Simple search
 ```js
-kat.search('Anger Management')
+kat.search('ettv')
   .then(res => console.log(res))
   .catch(err => console.err(err));
 ```
@@ -32,7 +32,7 @@ kat.search('Anger Management')
 #### Advanced search
 ```js
 kat.search({
-  query: 'Anger Management',
+  query: 'ettv',
   category: 'tv',
   sort_by: 'seeders',
   order: 'desc',

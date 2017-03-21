@@ -7,4 +7,4 @@ const kat = new KAT();
 // Simple search
 kat.search('ettv')
   .then(res => console.log(res))
-  .catch(err => console.error(err));
+  .catch(err => console.err(err));
