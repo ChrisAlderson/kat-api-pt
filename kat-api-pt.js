@@ -68,8 +68,8 @@ module.exports = class KAT {
   _formatPage(res, page, date) {
     const $ = cheerio.load(res);
 
-    const data = $('p[align=center]').text();
-    const total_results = parseInt(data.match(/(\d+)<</i)[1]);
+    const data = $('a.button.button--gray').last().text();
+    const total_results = parseInt(data.match(/(\d+)$/i)[1], 10);
     const total_pages = Math.ceil(total_results / 20);
 
     const result = {
@@ -80,20 +80,24 @@ module.exports = class KAT {
       results: []
     };
 
+    const _this = this;
     $('tr.t-row').each(function() {
       const entry = $(this);
 
+      const date = entry.find('td.ttable_col1').eq(1).text();
+      const dateRegex = date.match(/(\d+)-(\d+)-(\d+)\s(.*)/i);
+
       const title = entry.find('a.cellMainLink').text();
       const category = entry.find('span[id*=cat_]').find('a').text();
-      const link = `${this._baseUrl}entry.find('a.cellMainLink').attr('href')`;
+      const link = `${_this._baseUrl}${entry.find('a.cellMainLink').attr('href')}`;
       const verifiedTitle = entry.find('i.ka ka-verify').attr('title');
       const verified = verifiedTitle === 'Uploader' ? 0 : 1;
       const comments = parseInt(entry.find('a.icommentjs.kaButton.smallButton.rightButton').text());
       // const magnet = $(this).find('a.icon16[data-nop]').attr('href');
-      const torrentLink = `${this._baseUrl}$(this).find('a.icon16[data-download]').attr('href')`;
+      const torrentLink = `${_this._baseUrl}${$(this).find('a.icon16[data-download]').attr('href')}`;
       const fileSize = entry.find('td.ttable_col2').eq(0).text();
       const size = bytes(fileSize);
-      const pubDate = Number(new Date(entry.find('td.ttable_col1').eq(1).text()));
+      const pubDate = Number(new Date(`${dateRegex[3]}-${dateRegex[2]}-${dateRegex[1]} ${dateRegex[4]}`));
       const seeds = parseInt(entry.find('td.ttable_col2').eq(1).text(), 10);
       const leechs = parseInt(entry.find('td.ttable_col1').eq(2).text(), 10);
       const peers = seeds + leechs;
