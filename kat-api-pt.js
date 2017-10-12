@@ -37,7 +37,7 @@ module.exports = class KAT {
       'russian': 7,
       'spanish': 6,
       'tamil': 16,
-      'teleglu': 17,
+      'telugu': 17,
       'turkish': 18,
       'unknown': 8
     };
