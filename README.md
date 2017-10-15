@@ -1,6 +1,7 @@
 # kat-api-pt
 
 [![Build Status](https://travis-ci.org/ChrisAlderson/kat-api-pt.svg?branch=master)](https://travis-ci.org/ChrisAlderson/kat-api-pt)
+[![Coverage Status](https://coveralls.io/repos/github/ChrisAlderson/kat-api-pt/badge.svg?branch=master)](https://coveralls.io/github/ChrisAlderson/kat-api-pt?branch=master)
 [![Dependency Status](https://david-dm.org/ChrisAlderson/kat-api-pt.svg)](https://david-dm.org/ChrisAlderson/kat-api-pt)
 [![devDependency Status](https://david-dm.org/ChrisAlderson/kat-api-pt/dev-status.svg)](https://david-dm.org/ChrisAlderson/kat-api-pt#info=devDependencies)
 
@@ -15,16 +16,18 @@ npm install --save kat-api-pt
 
 #### Initialize
 ```js
-const KAT = require('kat-api-pt');
+const KatApi = require('kat-api-pt')
 
-const kat = new KAT({[baseUrl, debug]});
+const kat = new KatApi({
+  baseUrl // The base url of kat.co. Defaults to 'https://kat.co/new/'
+})
 ```
 
 ### Example usage
 
 #### Simple search
 ```js
-kat.search('ettv')
+kat.search('westworld')
   .then(res => console.log(res))
   .catch(err => console.err(err));
 ```
@@ -32,11 +35,11 @@ kat.search('ettv')
 #### Advanced search
 ```js
 kat.search({
-  query: 'ettv',
-  category: 'tv',
-  sort_by: 'seeders',
-  order: 'desc',
-  language: 'en'
+  query: 'westworld',
+  category: 'tv_other',
+  sortBy: 'seeders',
+  orderBy: 'desc',
+  language: 'english'
 }).then(res => console.log(res))
   .catch(err => console.error(err));
 ```
@@ -46,12 +49,11 @@ kat.search({
 Example of a response:
 
 ```js
-{
-	response_time: 1066,
-	page: 1,
-	total_results: 487,
-	total_pages: '20',
-	results: [...]
+{ response_time: 257,
+  page: 1,
+  total_results: 15,
+  total_pages: 1,
+  results: [...]
 }
 ```
 
@@ -61,19 +63,17 @@ Example of one object from the `results` array:
 
 ```js
 {
-	title: 'Anger Management (2003) 720p BrRip x264 - 650MB - YIFY',
-	category: 'Highres Movies',
-	link: '/anger-management-2003-720p-brrip-x264-650mb-yify-t6490832.html',
-	verified: 1,
-	comments: 106,
-	torrentLink: '//torcache.net/torrent/108C481959274F982AB442F3A83CCEA684519801.torrent?title=[kat.cr]anger.management.2003.720p.brrip.x264.650mb.yify',
-	fileSize: '650.44 MB',
-	size: 682035773,
-	files: 3,
-	pubDate: 1341724680000,
-	seeds: 57,
-	leechs: 6,
-	peers: 63
+  title: 'Westworld S01E08 HDTV XviD B4ND1T69',
+  category: 'TV',
+  link: 'https://katcr.co/torrents-details.php?id=136488',
+  verified: false,
+  comments: 0,
+  torrentLink: 'https://katcr.co/download.php?id=136488&name=',
+  fileSize: '434.33 MB',
+  size: 455428014,
+  seeds: 3,
+  leechs: 3,
+  peers: 6
 }
 ```
 
@@ -85,11 +85,118 @@ These are the parameters available for the advanced search:
  - category
  - language
  - page
- - sort_by
- - order
- - incldead
- - freeleech
- - inclexternal
+ - sortBy
+ - orderBy
+
+### category
+
+These are the available categories to search with:
+
+ - anime_english_translated
+ - anime_other
+ - applications_handheld
+ - applications_windows
+ - applications_mac
+ - applications_linux
+ - applications_other
+ - books_children
+ - books_comics
+ - books_manga
+ - books_magazines
+ - books_textbooks
+ - books_fiction
+ - books_non_fiction
+ - books_audio_books
+ - books_biography
+ - books_religion
+ - books_history
+ - books_computers_technology
+ - books_educational
+ - books_cooking
+ - books_sport
+ - books_other
+ - games_windows
+ - games_linux
+ - games_xbox
+ - games_wii
+ - games_handheld
+ - games_playstation
+ - games_other
+ - movies_3d_movies
+ - movies_hd
+ - movies_screener
+ - movies_ultrahd
+ - movies_dubbed_movies
+ - movies_asian_bollywood
+ - movies_animation
+ - movies_documentary
+ - movies_other
+ - movies_blu_ray_iso
+ - movies_cam
+ - movies_dvd_iso
+ - music_mp3
+ - music_lossless
+ - music_radio_shows
+ - music_aac
+ - music_transcode
+ - music_soundtrack
+ - music_karaoke
+ - music_videos_concerts
+ - music_other
+ - other_subtitles
+ - other_pictures
+ - other_other
+ - other_tutorials
+ - other_wordpress
+ - other_dazposer
+ - tv_dvd_iso
+ - tv_blu_ray_iso
+ - tv_hd
+ - tv_documentary
+ - tv_sport
+ - tv_other
+ - tv_ultra_hd
+ - xxx_videos
+ - xxx_hd
+ - xxx_ultrahd
+ - xxx_pictures
+ - xxx_magazines
+ - xxx_books
+ - xxx_hentai
+ - xxx_xxx_games
+
+### Languages
+ - all
+ - english
+ - bengali
+ - chinese
+ - dutch
+ - french
+ - german
+ - greek
+ - hindi
+ - italian
+ - japanese
+ - korean
+ - russian
+ - spanish
+ - tamil
+ - telegu
+ - turkish
+ - unknown
+
+### Sort
+ - id
+ - name
+ - comments
+ - size
+ - completed
+ - seeders
+ - leechers
+
+### Order
+ - asc
+ - desc
 
 # License
 
