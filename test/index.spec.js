@@ -20,10 +20,49 @@ describe('KatApi', () => {
     kat = new KatApi()
   })
 
+  /**
+   * Test the attributes of a response object.
+   * @param {Response} response - The response object to test.
+   * @returns {undefined}
+   */
+  function testResponse(response) {
+    expect(response).to.be.an('object')
+    expect(response.response_time).to.be.a('number')
+    expect(response.page).to.be.a('number')
+    expect(response.total_results).to.be.a('number')
+    expect(response.total_pages).to.be.a('number')
+    expect(response.results).to.be.an('array')
+  }
+
+  /**
+   * Test the array of torrents.
+   * @param {Array<Torrent>} results - The torrent array to test.
+   * @returns {undefined}
+   */
+  function testTorrentResults(results) {
+    const random = Math.floor(Math.random() * results.length)
+
+    const toTest = results[random]
+
+    expect(toTest.title).to.be.a('string')
+    expect(toTest.category).to.be.a('string')
+    expect(toTest.link).to.be.a('string')
+    expect(toTest.verified).to.be.a('boolean')
+    expect(toTest.comments).to.be.a('number')
+    expect(toTest.torrentLink).to.be.a('string')
+    expect(toTest.fileSize).to.be.a('string')
+    expect(toTest.size).to.be.a('number')
+    expect(toTest.seeds).to.be.a('number')
+    expect(toTest.leechs).to.be.a('number')
+    expect(toTest.peers).to.be.a('number')
+  }
+
   /** @test {KatApi#search} */
   it('Should get results with a simple search', done => {
     kat.search('Westworld').then(res => {
-      expect(res).to.be.an('object')
+      testResponse(res)
+      testTorrentResults(res.results)
+
       done()
     }).catch(err => done(err))
   })
@@ -38,7 +77,9 @@ describe('KatApi', () => {
       language: 'english',
       page: 1
     }).then(res => {
-      expect(res).to.be.an('object')
+      testResponse(res)
+      testTorrentResults(res.results)
+
       done()
     }).catch(err => done(err))
   })
@@ -53,7 +94,9 @@ describe('KatApi', () => {
       language: 'english',
       page: 1
     }).then(res => {
-      expect(res).to.be.an('object')
+      testResponse(res)
+      expect(res.results.length).to.equal(0)
+
       done()
     }).catch(err => done(err))
   })

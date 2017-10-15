@@ -27,7 +27,7 @@ const { name } = require('./package')
  * @property {string} torrentLink The torrentLink of the torrent.
  * @property {string} fileSize The fileSize of the torrent.
  * @property {number} size The size of the torrent.
- * @property {numer} seeds The seeds of the torrent.
+ * @property {number} seeds The seeds of the torrent.
  * @property {number} leechs The leechs of the torrent.
  * @property {number} peers The peers of the torrent.
  */
