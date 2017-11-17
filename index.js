@@ -197,9 +197,14 @@ module.exports = class KatApi {
     }
 
     this._debug(`Making request to: '${uri}?${stringify(query)}'`)
+    const delay = 4250 - (Date.now() - this.lastRequestTime)
 
-    return got.get(uri, opts)
-      .then(({ body }) => cheerio.load(body))
+    return new Promise(resolve => {
+      return setTimeout(() => {
+        return got.get(uri, opts)
+          .then(({ body }) => resolve(cheerio.load(body)))
+      }, delay)
+    })
   }
 
   /**
@@ -322,12 +327,12 @@ module.exports = class KatApi {
    * @returns {Promise<Response, Error>} - The response object of the query.
    */
   search(query) {
-    const date = Date.now()
+    this.lastRequestTime = Date.now()
 
     if (typeof (query) === 'string') {
-      return this._getData({ query }, date)
+      return this._getData({ query }, this.lastRequestTime)
     } else if (typeof (query) === 'object') {
-      return this._getData(query, date)
+      return this._getData(query, this.lastRequestTime)
     }
 
     const err = new Error('search needs an object or string as a parameter!')
