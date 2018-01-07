@@ -197,14 +197,9 @@ module.exports = class KatApi {
     }
 
     this._debug(`Making request to: '${uri}?${stringify(query)}'`)
-    const delay = 4250 - (Date.now() - this.lastRequestTime)
-
-    return new Promise(resolve => {
-      return setTimeout(() => {
-        return got.get(uri, opts)
-          .then(({ body }) => resolve(cheerio.load(body)))
-      }, delay)
-    })
+    return got.get(uri, opts)
+      .then(({ body }) => cheerio.load(body))
+      // .then(({ body }) => body)
   }
 
   /**
@@ -216,52 +211,66 @@ module.exports = class KatApi {
    */
   _formatPage($, page, date) {
     const data = $('a.button.button--gray').last().text()
-    const totalResults = data ? parseInt(data.match(/(\d+)$/i)[1], 10) : 0
-    const totalPages = Math.ceil(totalResults / 15)
+    const hasNext = data.toLowerCase() === 'next'
 
     const result = {
-      response_time: date,
+      responseTime: date,
       page,
-      total_results: totalResults,
-      total_pages: totalPages,
-      results: []
+      hasNext
     }
 
-    const _this = this
-    $('tr.t-row').each(function () {
-      const entry = $(this)
+    const self = this
+    result.results = $('table.torrents_table')
+      .children('tbody')
+      .find('tr')
+      .map(function () {
+        const entry = $(this)
 
-      const title = entry.find('a.cellMainLink').text()
+        const title = entry.find('a.torrents_table__torrent_title > b').text()
+        const link = entry.find('a.torrents_table__torrent_title').attr('href')
 
-      const category = entry.find('span[id*=cat_]').find('a').text()
-      const link = `${_this._baseUrl}${entry.find('a.cellMainLink').attr('href')}`
-      const verifiedTitle = entry.find('i.ka ka-verify').attr('title')
-      const verified = verifiedTitle === 'Uploader'
-      const comments = parseInt(
-        entry.find('a.icommentjs.kaButton.smallButton.rightButton').text(), 10
-      )
-      const torrentLink = `${_this._baseUrl}${$(this).find('a.icon16[data-download]').attr('href')}`
-      const fileSize = entry.find('td.ttable_col2').eq(0).text()
-      const size = bytes(fileSize)
-      const seeds = parseInt(entry.find('td.ttable_col2').eq(1).text(), 10)
-      let leechs = parseInt(entry.find('td.ttable_col1').eq(2).text(), 10)
-      leechs = !isNaN(leechs) ? leechs : 0
-      const peers = seeds + leechs
+        const category = entry.find('span.torrents_table__upload_info')
+          .find('a > strong')
+          .last()
+          .text()
 
-      result.results.push({
-        title,
-        category,
-        link,
-        verified,
-        comments,
-        torrentLink,
-        fileSize,
-        size,
-        seeds,
-        leechs,
-        peers
-      })
-    })
+        const verified = entry.find('i.kf__crown').length > 0
+
+        const comments = parseInt(
+          entry.find('a.button.button--small[title="Comments"]').text(), 10
+        )
+        const torrentLink = entry
+          .find('a.button.button--small[title="Torrent magnet link"]')
+          .attr('href')
+        const fileSize = entry.find('td.text--nowrap.text--center')
+          .eq(0)
+          .text()
+        const size = bytes(fileSize)
+
+        const seeds = parseInt(
+          entry.find('td.text--nowrap.text--center.text--success').eq(0).text(),
+          10
+        )
+        const leechs = parseInt(
+          entry.find('td.text--nowrap.text--center.text--error').eq(0).text(),
+          10
+        )
+        const peers = seeds + leechs
+
+        return {
+          title,
+          category,
+          link: `${self._baseUrl}/${link}`,
+          verified,
+          comments,
+          torrentLink,
+          fileSize,
+          size,
+          seeds,
+          leechs,
+          peers
+        }
+      }).get()
 
     return result
   }
@@ -280,7 +289,7 @@ module.exports = class KatApi {
    */
   _getData({
     category,
-    query,
+    query = '',
     page = 1,
     language,
     sortBy = 'id',
@@ -310,10 +319,8 @@ module.exports = class KatApi {
     const sort = this._sort[sortBy]
     const order = this._order[orderBy]
 
-    return this._get('/new/search-torrents.php', {
-      search: query,
+    return this._get(`katsearch/page/${page}/${query}`, {
       cat,
-      page,
       lang,
       sort,
       order

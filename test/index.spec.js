@@ -27,10 +27,9 @@ describe('KatApi', () => {
    */
   function testResponse(response) {
     expect(response).to.be.an('object')
-    expect(response.response_time).to.be.a('number')
+    expect(response.responseTime).to.be.a('number')
     expect(response.page).to.be.a('number')
-    expect(response.total_results).to.be.a('number')
-    expect(response.total_pages).to.be.a('number')
+    expect(response.hasNext).to.be.a('boolean')
     expect(response.results).to.be.an('array')
   }
 

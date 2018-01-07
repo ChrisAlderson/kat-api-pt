@@ -7,5 +7,5 @@ const kat = new KatApi()
 
 // Simple search
 kat.search('westworld')
-  .then(res => console.log(res))
+  // .then(res => console.log(res))
   .catch(err => console.error(err))
