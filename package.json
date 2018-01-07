@@ -20,7 +20,7 @@
   "scripts": {
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint {examples,test}/** *.js",
-    "test": "/nyc -r=text -r=lcov mocha --timeout 15000 --exit"
+    "test": "nyc -r=text -r=lcov mocha --timeout 15000 --exit"
   },
   "engines": {
     "node": ">=6.3.0"
